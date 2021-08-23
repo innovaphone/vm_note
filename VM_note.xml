@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<voicemail>
+<!-- innovaphone VM Note advidor == innovaphone KWA/AZA 2017 V100 -->
+	
+	<function define="setCFW">
+		<index out="$res" value="$targed" pos="1" size="3"/> 
+		<switch var="$res">
+			<case equal="*21">
+				<index out="$res" value="$targed" pos="4" size="25"/> 
+				<pbx-upd-obj name="$cn" type="cfu" value="$res" />
+				<lib-strcat out-string="$res" string="$lang" string2="_umgeleitet.$coder"/> 
+				<store-get root="" name="$res" out-url="$ctrl" /> 
+				<pbx-prompt url="$ctrl" repeat="false" />  
+				<pbx-disc/>
+			</case>
+			<case equal="*22">
+				<pbx-upd-obj name="$cn" type="cfu" value="" /> 
+				<lib-strcat out-string="$res" string="$lang" string2="_kfesteARU.$coder"/> 
+				<store-get root="" name="$res" out-url="$ctrl"/>
+				<pbx-prompt url="$ctrl" repeat="false" />  
+				<pbx-disc/>
+			</case>
+		</switch>
+	</function>
+
+	<function define="Main">
+		<pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2" />
+		<if cond="$cdpn">
+			<pbx-xfer e164="$cdpn"/>
+		</if>
+		<assign out="$lang" value="it" />    <!-- SET LANGUAGE de it en ...  -->
+		<assign out="$targed" value=""/>
+		<event type="timer" name="vbguard">
+			<if cond="$targed">
+				<call name="setCFW" /> 
+				<pbx-xfer e164="$targed"/>
+				<pbx-disc/>
+			</if>     		
+		</event>
+		<timer name="vbguard" sec="20"/> 
+		<assign out="$dialtone" value="true" />  
+		<assign out="$silence" value="true" />  
+		<event type="dtmf" block="false">
+			<pbx-getdtmfdigit out-dtmf="$dtmf" /> 
+			<timer name="vbguard" sec="4"/>  
+			<assign out="$dialtone" value="false" /> 
+			<switch var="$dtmf">
+				<case equal="#">
+					<call name="setCFW" /> 		
+					<pbx-xfer e164="$targed"/>
+					<pbx-disc/>
+				</case>
+			</switch>
+			<lib-strcat string="$targed" string2="$dtmf" out-string="$targed" /> 
+  		</event>
+		<pbx-finduser-e164 e164="$cgpn" out-cn="$cn" />
+		<pbx-query-obj name="$cn" type="cfu" out="$to" />
+		<if cond="$to">	
+			<lib-strcat out-string="$res" string="$lang" string2="_umgeleitet.$coder"/> 
+			<store-get root="" name="$res" out-url="$ctrl" /> 
+			<pbx-prompt url="$ctrl" repeat="false" /> 
+			<assign out="$string" value="$to" />
+			<store-get root="" name="silence.$coder" out-url="$ctrl"/>
+			<pbx-prompt url="$ctrl" repeat="false" sec="1"/>  
+		</if>	
+		<store-get-msgcount root="$cn" out-count="$msgcount" />
+		<switch var="$msgcount">
+			<case greater="0">
+				<assign out="$myLang" value="_you_have_one_new_message.$coder" />	
+				<switch var="$lang">
+					<case equal="it">
+						<assign out="$myLang" value="_avete_un_messaggio.$coder" />
+					</case>
+				</switch>
+				<lib-strcat out-string="$res" string="$lang" string2="$myLang"/> 
+				<store-get root="" name="$res" out-url="$ctrl"/>
+				<pbx-prompt url="$ctrl" repeat="false" />  
+			</case>
+		</switch>
+		<store-get root="" name="EuropeTone.$coder" out-url="$ctrl"/>
+		<while cond="$dialtone">
+			<pbx-prompt url="$ctrl" repeat="false" />  
+		</while>
+		<store-get root="" name="silence.$coder" out-url="$ctrl"/>
+		<while cond="$silence">
+			<pbx-prompt url="$ctrl" repeat="false" />  
+		</while>
+	</function>
+</voicemail>
+<!-- VM_note wiki-src/xml/VM_note 1,0,0,0 (C) innovaphone AG 2010-2017 -->
