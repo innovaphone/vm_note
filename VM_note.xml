@@ -65,7 +65,7 @@
 		</if>	
 		<store-get-msgcount root="$cn" out-count="$msgcount" />
 		<if cond="$msgcount">
-		 <switch var="$msgcount">
+		
 			<case greater="0">
 				<assign out="$myLang" value="_you_have_one_new_message.$coder" />	
 				<switch var="$lang">
@@ -78,7 +78,7 @@
 				<pbx-prompt url="$ctrl" repeat="false" />  
 			</case>
 		 </switch>
-		</if>
+		
 		<store-get root="" name="EuropeTone.$coder" out-url="$ctrl"/>
 		<while cond="$dialtone">
 			<pbx-prompt url="$ctrl" repeat="false" />  
@@ -89,4 +89,4 @@
 		</while>
 	</function>
 </voicemail>
-<!-- VM_note wiki-src/xml/VM_note 1,0,1,0 (C) innovaphone AG 2010-2017 -->
+<!-- VM_note wiki-src/xml/VM_note 1,0,2,0 (C) innovaphone AG 2010-2017 -->
